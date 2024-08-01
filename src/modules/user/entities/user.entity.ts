@@ -10,6 +10,7 @@ import { Profile } from '../../profile/entities/profile.entity';
 import { OrganisationMember } from '../../organisations/entities/org-members.entity';
 import { Notification } from '../../notifications/entities/notifications.entity';
 import { NotificationSettings } from '../../../modules/notification-settings/entities/notification-setting.entity';
+import { HelpCenterTopic } from 'src/modules/help-center-topics/entities/help-center-topics.entity';
 export enum UserType {
   SUPER_ADMIN = 'super-admin',
   ADMIN = 'admin',
@@ -90,4 +91,7 @@ export class User extends AbstractBaseEntity {
 
   @OneToOne(() => NotificationSettings, notification_settings => notification_settings.user)
   notifications_settings: NotificationSettings[];
+
+  @OneToMany(() => HelpCenterTopic, topic => topic.user)
+  helpCenterTopics: HelpCenterTopic[];
 }
