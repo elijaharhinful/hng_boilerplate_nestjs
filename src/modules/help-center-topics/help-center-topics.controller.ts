@@ -18,6 +18,6 @@ export class HelpCenterTopicsController {
     @Body() createHelpCenterTopicDto: CreateHelpCenterTopicDTO,
     @Request() req
   ): Promise<CreateHelpCenterTopicResponseDTO> {
-    return this.helpCenterTopicsService.createHelpCenterTopic(createHelpCenterTopicDto, req.user);
+    return this.helpCenterTopicsService.createHelpCenterTopic(createHelpCenterTopicDto, req.user.id);
   }
 }

@@ -10,14 +10,23 @@ import { CreateHelpCenterTopicResponseDTO } from './dto/create-help-center-topic
 export class HelpCenterTopicsService {
   constructor(
     @InjectRepository(HelpCenterTopic)
-    private helpCenterTopicRepository: Repository<HelpCenterTopic>
+    private helpCenterTopicRepository: Repository<HelpCenterTopic>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) {}
 
   async createHelpCenterTopic(
     createHelpCenterTopicDto: CreateHelpCenterTopicDTO,
-    user: User
+    userId: string
   ): Promise<CreateHelpCenterTopicResponseDTO> {
-    console.log(user.user_type);
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new ForbiddenException({
+        error: 'Forbidden',
+        message: 'User not found',
+        status_code: HttpStatus.FORBIDDEN,
+      });
+    }
     if (user.user_type !== UserType.SUPER_ADMIN) {
       throw new ForbiddenException({
         error: 'Forbidden',
