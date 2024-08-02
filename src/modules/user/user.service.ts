@@ -103,7 +103,7 @@ export default class UserService {
   async updateUser(
     userId: string,
     updateUserDto: UpdateUserDto,
-    currentUser: UserPayload
+    currentUserId: { id: string }
   ): Promise<UpdateUserResponseDTO> {
     if (!userId) {
       throw new BadRequestException({
@@ -117,8 +117,8 @@ export default class UserService {
       identifierType: 'id',
       identifier: userId,
     };
-    const user = await this.getUserRecord(identifierOptions);
-    if (!user) {
+    const userToUpdate = await this.getUserRecord(identifierOptions);
+    if (!userToUpdate) {
       throw new NotFoundException({
         error: 'Not Found',
         message: 'User not found',
@@ -126,7 +126,15 @@ export default class UserService {
       });
     }
 
-    // Check if the current user is a super admin or the user being updated
+    const currentUser = await this.userRepository.findOne({ where: { id: currentUserId.id } });
+    if (!currentUser) {
+      throw new NotFoundException({
+        error: 'Not Found',
+        message: 'Current user not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
+
     if (currentUser.user_type !== UserType.SUPER_ADMIN && currentUser.id !== userId) {
       throw new ForbiddenException({
         error: 'Forbidden',
@@ -136,8 +144,8 @@ export default class UserService {
     }
 
     try {
-      Object.assign(user, updateUserDto);
-      await this.userRepository.save(user);
+      Object.assign(userToUpdate, updateUserDto);
+      await this.userRepository.save(userToUpdate);
     } catch (error) {
       throw new BadRequestException({
         error: 'Bad Request',
@@ -150,9 +158,9 @@ export default class UserService {
       status: 'success',
       message: 'User Updated Successfully',
       user: {
-        id: user.id,
-        name: `${user.first_name} ${user.last_name}`,
-        phone_number: user.phone_number,
+        id: userToUpdate.id,
+        name: `${userToUpdate.first_name} ${userToUpdate.last_name}`,
+        phone_number: userToUpdate.phone_number,
       },
     };
   }
@@ -193,7 +201,15 @@ export default class UserService {
     return { is_active: user.is_active, message: 'Account Deactivated Successfully' };
   }
 
-  async getUsersByAdmin(page: number = 1, limit: number = 10, currentUser: UserPayload): Promise<any> {
+  async getUsersByAdmin(page: number = 1, limit: number = 10, currentUserId: { id: string }): Promise<any> {
+    const currentUser = await this.userRepository.findOne({ where: { id: currentUserId.id } });
+    if (!currentUser) {
+      throw new NotFoundException({
+        error: 'Not Found',
+        message: 'Current user not found',
+        status_code: HttpStatus.NOT_FOUND,
+      });
+    }
     if (currentUser.user_type !== UserType.SUPER_ADMIN) {
       throw new ForbiddenException({
         error: 'Forbidden',

@@ -33,7 +33,7 @@ export class UserController {
   })
   @Patch(':userId')
   async updateUser(
-    @Request() req: { user: UserPayload },
+    @Request() req: { user: { id: string } },
     @Param('userId') userId: string,
     @Body() updatedUserDto: UpdateUserDto
   ) {
@@ -59,7 +59,7 @@ export class UserController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   async getAllUsers(
-    @Request() req: { user: UserPayload },
+    @Request() req: { user: { id: string } },
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10
   ) {
